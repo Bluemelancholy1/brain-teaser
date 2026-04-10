@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>脑筋急转弯挑战 🧠</title>
+<style>
+  /* 使用系统字体以确保微信兼容性 */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0a0a0f;
+    --card: #13131c;
+    --border: #1e1e2e;
+    --accent: #f5a623;
+    --accent2: #e040fb;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --green: #4ade80;
+    --red: #f87171;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bg-orbs { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+  .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; }
+  .orb1 { width: 400px; height: 400px; background: var(--accent); top: -100px; left: -100px; }
+  .orb2 { width: 300px; height: 300px; background: var(--accent2); bottom: -50px; right: -50px; }
+  .orb3 { width: 200px; height: 200px; background: #60a5fa; top: 40%; left: 60%; }
+
+  .container { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 0 16px 60px; }
+
+  .header { text-align: center; padding: 36px 0 24px; }
+  .badge {
+    display: inline-block; background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 20px;
+    letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px;
+  }
+  .header h1 {
+    font-size: 26px; font-weight: 900; line-height: 1.2;
+    background: linear-gradient(135deg, #fff 30%, var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .header p { color: var(--muted); font-size: 13px; margin-top: 6px; }
+
+  .progress-wrap { margin-bottom: 20px; }
+  .progress-info { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+  .progress-bar { height: 3px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 3px; transition: width 0.4s cubic-bezier(0.4,0,0.2,1); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px 20px; margin-bottom: 12px; }
+  .q-num { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+  .question {
+    font-size: 17px; font-weight: 700; line-height: 1.65; color: var(--text);
+    padding: 16px; background: rgba(255,255,255,0.03); border-left: 3px solid var(--accent);
+    border-radius: 8px; margin-bottom: 18px; word-break: break-all;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .option {
+    padding: 13px 16px; background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border); border-radius: 10px;
+    cursor: pointer; font-size: 15px; color: var(--text);
+    transition: all 0.15s; display: flex; align-items: center; gap: 12px; user-select: none;
+  }
+  .option:active { transform: scale(0.98); }
+  .option:hover { background: rgba(245,166,35,0.08); border-color: rgba(245,166,35,0.4); }
+  .option.selected { background: rgba(245,166,35,0.15); border-color: var(--accent); }
+  .option.correct { background: rgba(74,222,128,0.12); border-color: var(--green); }
+  .option.wrong { background: rgba(248,113,113,0.12); border-color: var(--red); }
+  .opt-letter {
+    width: 26px; height: 26px; border-radius: 50%; background: rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  .option.selected .opt-letter { background: var(--accent); color: #000; }
+  .option.correct .opt-letter { background: var(--green); color: #000; }
+  .option.wrong .opt-letter { background: var(--red); color: #fff; }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 14px; }
+  .btn { flex: 1; padding: 13px; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.18s; font-family: inherit; }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), #f0a020); color: #000; }
+  .btn-primary:active { opacity: 0.85; transform: scale(0.98); }
+  .btn-ghost { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:active { background: rgba(255,255,255,0.1); }
+
+  .timer { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .timer.warning { color: #fbbf24; }
+  .timer.danger { color: var(--red); }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .timer.danger span { animation: blink 0.6s infinite; }
+
+  .nav-dots { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+  .nav-dot {
+    width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; cursor: pointer; transition: all 0.15s; border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04); color: var(--muted);
+  }
+  .nav-dot:hover { border-color: rgba(255,255,255,0.3); color: var(--text); }
+  .nav-dot.current { box-shadow: 0 0 0 2px var(--accent); color: var(--accent); border-color: var(--accent); }
+  .nav-dot.done-correct { background: rgba(74,222,128,0.2); border-color: rgba(74,222,128,0.5); color: var(--green); }
+  .nav-dot.done-wrong { background: rgba(248,113,113,0.2); border-color: rgba(248,113,113,0.5); color: var(--red); }
+  .nav-dot.unanswered { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: var(--muted); }
+
+  .start-icon { font-size: 60px; text-align: center; margin-bottom: 16px; }
+  .rules { background: rgba(255,255,255,0.03); border-radius: 12px; padding: 18px; margin: 20px 0; border: 1px solid var(--border); }
+  .rule-item { display: flex; gap: 10px; margin-bottom: 10px; font-size: 13px; color: var(--muted); align-items: flex-start; line-height: 1.5; }
+  .rule-item:last-child { margin-bottom: 0; }
+  .rule-icon { flex-shrink: 0; margin-top: 1px; }
+  .start-btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; background: linear-gradient(135deg, var(--accent), #f0a020); color: #000; font-family: inherit; transition: all 0.18s; }
+  .start-btn:active { opacity: 0.85; transform: scale(0.98); }
+
+  .result-card { text-align: center; padding: 32px 20px; }
+  .score-ring { width: 130px; height: 130px; margin: 0 auto 20px; position: relative; }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring circle { fill: none; stroke-width: 9; }
+  .score-bg { stroke: var(--border); }
+  .score-fill { stroke: url(#scoreGrad); stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1); }
+  .score-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+  .score-num { font-size: 34px; font-weight: 900; line-height: 1; }
+  .score-label { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .result-title { font-size: 20px; font-weight: 900; margin-bottom: 6px; }
+  .result-desc { color: var(--muted); font-size: 13px; line-height: 1.6; margin-bottom: 20px; padding: 0 8px; }
+  .stat-row { display: flex; gap: 10px; margin-bottom: 20px; }
+  .stat-box { flex: 1; padding: 14px 10px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); }
+  .stat-num { font-size: 22px; font-weight: 900; }
+  .stat-num.g { color: var(--green); }
+  .stat-num.r { color: var(--red); }
+  .stat-label { font-size: 10px; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 1px; }
+  .restart-btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; background: linear-gradient(135deg, var(--accent), #f0a020); color: #000; font-family: inherit; transition: all 0.18s; }
+  .restart-btn:active { opacity: 0.85; }
+
+  .review-title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; text-align: center; margin: 24px 0 14px; display: flex; align-items: center; gap: 12px; }
+  .review-title::before, .review-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .review-item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; }
+  .review-q { font-size: 13px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: flex-start; gap: 8px; }
+  .review-q-num { color: var(--accent); font-size: 11px; flex-shrink: 0; margin-top: 2px; }
+  .review-answer { font-size: 12px; color: var(--muted); padding-left: 18px; margin-bottom: 4px; }
+  .review-answer strong { color: var(--green); }
+  .review-user { font-size: 12px; padding-left: 18px; }
+  .review-user.correct strong { color: var(--green); }
+  .review-user.wrong strong { color: var(--red); }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-up { animation: fadeUp 0.35s ease forwards; }
+
+  .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(20,20,30,0.95); border: 1px solid var(--border); color: var(--text); padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; z-index: 9999; backdrop-filter: blur(10px); transition: opacity 0.3s; }
+</style>
+</head>
+<body>
+
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f5a623"/>
+      <stop offset="100%" style="stop-color:#e040fb"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="container" id="app"></div>
+<div id="toast" class="toast" style="display:none"></div>
+
+<script>
+const QUESTIONS = [
+  { q:"什么东西有头无脚？", o:["砖头","蛇","蚯蚓","鱼"], a:0 },
+  { q:"什么东西有脚无头？", o:["桌子","椅子","凳子","床"], a:0 },
+  { q:"什么东西越洗越脏？", o:["衣服","水","脸","手"], a:1 },
+  { q:"什么东西越热越爱出来？", o:["汗","眼泪","鼻涕","口水"], a:0 },
+  { q:"什么东西打破了才能吃？", o:["鸡蛋","核桃","西瓜","碗"], a:0 },
+  { q:"什么东西有进无出？", o:["坟墓","门","窗","洞"], a:0 },
+  { q:"什么东西有口无牙？", o:["井","杯子","碗","锅"], a:0 },
+  { q:"什么东西有眼无珠？", o:["针","网","筛子","漏勺"], a:0 },
+  { q:"什么东西有皮无肉？", o:["香蕉","橘子","苹果","梨"], a:0 },
+  { q:"什么东西有毛无皮？", o:["毛笔","刷子","鸡毛掸子","拖把"], a:0 },
+  { q:"什么东西有翅难飞？", o:["鸡","鸭","鹅","企鹅"], a:3 },
+  { q:"什么东西有嘴不会说？", o:["茶壶","杯子","碗","锅"], a:0 },
+  { q:"什么东西有手不会拿？", o:["手套","手表","手镯","手链"], a:0 },
+  { q:"什么东西有腿不会走？", o:["桌子","椅子","凳子","床"], a:0 },
+  { q:"什么东西有背不会驼？", o:["背包","后背","手背","脚背"], a:0 },
+  { q:"什么东西有脸无面？", o:["面具","脸谱","面子","脸面"], a:0 },
+  { q:"什么东西有耳不听？", o:["木耳","银耳","耳朵","耳机"], a:0 },
+  { q:"什么东西有鼻不闻？", o:["象鼻山","鼻子","鼻祖","鼻孔"], a:0 },
+  { q:"什么东西有舌不舔？", o:["鞋舌","舌头","舌苔","舌根"], a:0 },
+  { q:"什么东西有牙不咬？", o:["月牙","牙齿","牙刷","牙膏"], a:0 },
+  { q:"什么东西有骨无肉？", o:["伞骨","骨头","骨干","骨架"], a:0 },
+  { q:"什么东西有壳无蛋？", o:["蜗牛","乌龟","蚌","螺蛳"], a:0 },
+  { q:"什么东西有翼难飞？", o:["机翼","鼻翼","比翼鸟","小心翼翼"], a:3 },
+  { q:"什么东西有尾无头？", o:["彗星","尾巴","尾数","尾声"], a:0 },
+  { q:"什么东西有头无尾？", o:["砖头","火柴","蜡烛","铅笔"], a:0 },
+  { q:"什么东西有始无终？", o:["开始","始终","无始无终","有始有终"], a:0 },
+  { q:"什么东西有名无实？", o:["名义","名字","名誉","名望"], a:0 },
+  { q:"什么东西有影无踪？", o:["人影","影子","电影","影集"], a:0 },
+  { q:"什么东西有声无形？", o:["声音","名声","声望","声誉"], a:0 },
+  { q:"什么东西有色无味？", o:["颜色","色彩","色调","色素"], a:0 },
+  { q:"什么东西有味无色？", o:["味道","气味","滋味","口味"], a:0 },
+  { q:"什么东西有香无花？", o:["香水","香蕉","香菇","香菜"], a:0 },
+  { q:"什么东西有花无果？", o:["烟花","火花","浪花","雪花"], a:0 },
+  { q:"什么东西有果无花？", o:["无花果","苹果","梨子","桃子"], a:0 },
+  { q:"什么东西有叶无根？", o:["茶叶","树叶","菜叶","竹叶"], a:0 },
+  { q:"什么东西有根无叶？", o:["树根","草根","墙根","耳根"], a:0 },
+  { q:"什么东西有枝无叶？", o:["树枝","桂枝","荔枝","枝条"], a:0 },
+  { q:"什么东西有节无枝？", o:["竹子","藕","甘蔗","玉米"], a:1 },
+  { q:"什么东西有刺无花？", o:["玫瑰","仙人掌","荆棘","刺刀"], a:1 },
+  { q:"什么东西有刺无骨？", o:["刺猬","鱼刺","骨刺","刺青"], a:0 },
+  { q:"什么东西有鳞无爪？", o:["鱼","龙","蛇","蜥蜴"], a:0 },
+  { q:"什么东西有爪无鳞？", o:["鸡","鸭","鹅","鸟"], a:3 },
+  { q:"什么东西有角无蹄？", o:["鹿","牛","羊","犀牛"], a:0 },
+  { q:"什么东西有蹄无角？", o:["马","驴","骡","骆驼"], a:0 },
+  { q:"什么东西有毛无羽？", o:["兽","鸟","虫","鱼"], a:0 },
+  { q:"什么东西有羽无毛？", o:["鸟","兽","人","猿"], a:0 },
+  { q:"什么东西有翼无足？", o:["鸟","蝙蝠","蝴蝶","蜻蜓"], a:3 },
+  { q:"什么东西有足无翼？", o:["兽","人","虫","鱼"], a:0 },
+  { q:"什么东西有手无指？", o:["手套","手铐","手表","手镯"], a:0 },
+  { q:"什么东西有指无手？", o:["脚趾","手指","拇指","食指"], a:0 },
+  { q:"什么东西有眼无眉？", o:["针","钉子","图钉","螺丝"], a:0 },
+  { q:"什么东西有眉无眼？", o:["眉毛","眉笔","眉粉","眉刀"], a:0 },
+  { q:"什么东西有唇无齿？", o:["嘴唇","唇膏","口红","唇彩"], a:0 },
+  { q:"什么东西有齿无唇？", o:["齿轮","锯齿","牙齿","梳子"], a:0 },
+  { q:"什么东西有舌无喉？", o:["铃铛","铃","钟","锣"], a:0 },
+  { q:"什么东西有喉无舌？", o:["喉咙","喉结","歌喉","咽喉"], a:0 },
+  { q:"什么东西有肺无鼻？", o:["鱼","蛙","蛇","蚯蚓"], a:0 },
+  { q:"什么东西有鼻无肺？", o:["象","猪","狗","猫"], a:0 },
+  { q:"什么东西有心无肝？", o:["菜心","果心","核心","中心"], a:0 },
+  { q:"什么东西有肝无心？", o:["猪肝","牛肝","羊肝","鸡肝"], a:0 },
+  { q:"什么东西有胆无胃？", o:["蛇","鱼","蛙","蜥蜴"], a:0 },
+  { q:"什么东西有胃无胆？", o:["人","牛","羊","马"], a:0 },
+  { q:"什么东西有肠无肛？", o:["鸟","鱼","蛙","蛇"], a:0 },
+  { q:"什么东西有肛无肠？", o:["肛门","肛瘘","肛裂","痔疮"], a:0 },
+  { q:"什么东西有皮无骨？", o:["皮球","皮球鱼","皮球虫","皮球鸟"], a:0 },
+  { q:"什么东西有骨无皮？", o:["骷髅","骨头","骨架","骨折"], a:0 },
+  { q:"什么东西有血无肉？", o:["血豆腐","血肠","血旺","血糕"], a:0 },
+  { q:"什么东西有肉无血？", o:["植物人","植物","僵尸","机器人"], a:1 },
+  { q:"什么东西有筋无骨？", o:["面筋","牛筋","猪蹄筋","鸡爪筋"], a:0 },
+  { q:"什么东西有骨无筋？", o:["化石","骨头","骨架","骨折"], a:0 },
+  { q:"什么东西有毛无皮？", o:["毛笔","毛刷","毛掸","毛巾"], a:0 },
+  { q:"什么东西有皮无毛？", o:["皮球","皮鞋","皮包","皮带"], a:0 },
+  { q:"什么东西有鳞无甲？", o:["鱼","蛇","蜥蜴","鳄鱼"], a:0 },
+  { q:"什么东西有甲无鳞？", o:["龟","鳖","穿山甲","犰狳"], a:0 },
+  { q:"什么东西有壳无核？", o:["鸡蛋","鸭蛋","鹅蛋","鹌鹑蛋"], a:0 },
+  { q:"什么东西有核无壳？", o:["原子核","细胞核","果核","桃核"], a:0 },
+  { q:"什么东西有仁无壳？", o:["杏仁","桃仁","核桃仁","花生米"], a:3 },
+  { q:"什么东西有壳无仁？", o:["空壳","贝壳","蛋壳","果壳"], a:0 },
+  { q:"什么东西有叶无花？", o:["茶叶","桑叶","荷叶","竹叶"], a:0 },
+  { q:"什么东西有花无叶？", o:["昙花","菊花","梅花","兰花"], a:0 },
+  { q:"什么东西有根无茎？", o:["根须","根茎","根系","根部"], a:0 },
+  { q:"什么东西有茎无根？", o:["藕","芋头","土豆","红薯"], a:0 },
+  { q:"什么东西有实无虚？", o:["事实","真实","实在","实际"], a:0 },
+  { q:"什么东西有虚无实？", o:["空虚","虚无","虚空","虚幻"], a:0 },
+  { q:"什么东西有名无姓？", o:["名字","名称","名义","名分"], a:0 },
+  { q:"什么东西有姓无名？", o:["姓氏","姓","氏","氏族"], a:0 },
+  { q:"什么东西有字无号？", o:["字号","字","号","别号"], a:0 },
+  { q:"什么东西有号无字？", o:["号码","号子","号召","号令"], a:0 },
+  { q:"什么东西有章无句？", o:["文章","章节","章法","章程"], a:0 },
+  { q:"什么东西有句无章？", o:["句子","句号","句读","词句"], a:0 },
+  { q:"什么东西有词无曲？", o:["歌词","诗词","名词","动词"], a:0 },
+  { q:"什么东西有曲无词？", o:["乐曲","曲调","曲目","曲子"], a:0 },
+  { q:"什么东西有画无诗？", o:["图画","绘画","油画","国画"], a:0 },
+  { q:"什么东西有诗无画？", o:["诗歌","诗词","诗句","诗篇"], a:0 },
+  { q:"什么东西有琴无弦？", o:["钢琴","风琴","口琴","电子琴"], a:2 },
+  { q:"什么东西有弦无琴？", o:["弓弦","琴弦","弦乐","弦子"], a:0 },
+  { q:"什么东西有棋无盘？", o:["围棋","象棋","跳棋","军棋"], a:0 },
+  { q:"什么东西有盘无棋？", o:["棋盘","盘","托盘","茶盘"], a:0 },
+  { q:"什么东西有书无字？", o:["天书","无字天书","空白书","画册"], a:1 },
+  { q:"什么东西有字无书？", o:["文字","字","字体","字迹"], a:0 },
+  { q:"什么东西有纸无笔？", o:["卫生纸","纸巾","纸","纸张"], a:0 },
+  { q:"什么东西有笔无纸？", o:["铅笔","钢笔","毛笔","圆珠笔"], a:0 },
+  { q:"什么东西有墨无水？", o:["墨汁","墨块","墨条","墨盒"], a:0 },
+  { q:"什么东西有水无墨？", o:["墨水","水彩","水粉","水墨"], a:0 },
+  { q:"什么东西有砚无墨？", o:["砚台","石砚","端砚","歙砚"], a:0 },
+  { q:"什么东西有墨无砚？", o:["墨汁","墨块","墨条","墨盒"], a:0 },
+  { q:"什么东西有印无泥？", o:["印章","印","打印","复印"], a:0 },
+  { q:"什么东西有泥无印？", o:["泥巴","泥土","水泥","混凝土"], a:0 },
+  { q:"什么东西有锁无钥？", o:["密码锁","指纹锁","电子锁","挂锁"], a:0 },
+  { q:"什么东西有钥无锁？", o:["钥匙","密钥","钥","锁钥"], a:0 },
+  { q:"什么东西有门无户？", o:["大门","门口","门面","门票"], a:0 },
+  { q:"什么东西有户无门？", o:["窗户","户口","账户","门户"], a:0 },
+  { q:"什么东西有窗无户？", o:["窗户","窗口","窗台","窗帘"], a:0 },
+  { q:"什么东西有户无窗？", o:["账户","户口","门户","窗户"], a:0 },
+  { q:"什么东西有墙无顶？", o:["围墙","墙壁","城墙","防火墙"], a:0 },
+  { q:"什么东西有顶无墙？", o:["屋顶","顶棚","顶","天花板"], a:0 },
+  { q:"什么东西有柱无梁？", o:["柱子","石柱","木柱","铁柱"], a:0 },
+  { q:"什么东西有梁无柱？", o:["桥梁","房梁","梁","脊梁"], a:0 },
+  { q:"什么东西有梯无楼？", o:["梯子","阶梯","梯田","梯形"], a:0 },
+  { q:"什么东西有楼无梯？", o:["跳楼","楼层","楼房","楼台"], a:0 },
+  { q:"什么东西有桥无河？", o:["天桥","立交桥","栈桥","浮桥"], a:0 },
+  { q:"什么东西有河无桥？", o:["黄河","长江","银河","运河"], a:2 },
+  { q:"什么东西有路无车？", o:["思路","电路","纹路","纹路"], a:0 },
+  { q:"什么东西有车无路？", o:["车模","玩具车","概念车","模型车"], a:0 },
+  { q:"什么东西有轨无车？", o:["轨道","铁轨","轨迹","轨迹"], a:0 },
+  { q:"什么东西有车无轨？", o:["汽车","自行车","摩托车","三轮车"], a:0 },
+  { q:"什么东西有灯无光？", o:["台灯","路灯","红绿灯","指示灯"], a:0 },
+  { q:"什么东西有光无灯？", o:["阳光","月光","星光","火光"], a:0 },
+  { q:"什么东西有火无烟？", o:["鬼火","磷火","电火","天火"], a:0 },
+  { q:"什么东西有烟无火？", o:["香烟","烟雾","烟尘","烟花"], a:0 },
+  { q:"什么东西有影无身？", o:["倒影","影子","幻影","魅影"], a:0 },
+  { q:"什么东西有身无影？", o:["透明人","隐形人","鬼","魂"], a:0 },
+  { q:"什么东西有形无影？", o:["形状","形态","形式","形象"], a:0 },
+  { q:"什么东西有影无形？", o:["倒影","影子","幻影","魅影"], a:0 },
+  { q:"什么东西有声无音？", o:["名声","声望","声誉","名望"], a:0 },
+  { q:"什么东西有音无声？", o:["音符","音节","音标","音素"], a:0 },
+  { q:"什么东西有色无彩？", o:["颜色","色彩","色调","色素"], a:0 },
+  { q:"什么东西有彩无色？", o:["彩虹","彩云","彩带","彩票"], a:0 },
+  { q:"什么东西有味无香？", o:["臭味","苦味","酸味","辣味"], a:0 },
+  { q:"什么东西有香无味？", o:["香水","香皂","香薰","香炉"], a:0 },
+  { q:"什么东西有甜无酸？", o:["糖","蜂蜜","糖果","甜筒"], a:0 },
+  { q:"什么东西有酸无甜？", o:["醋","柠檬","酸梅","酸奶"], a:0 },
+  { q:"什么东西有苦无甜？", o:["苦瓜","苦药","苦胆","苦水"], a:0 },
+  { q:"什么东西有甜无苦？", o:["糖","蜂蜜","糖果","甜筒"], a:0 },
+  { q:"什么东西有辣无麻？", o:["辣椒","辣酱","辣条","辣油"], a:0 },
+  { q:"什么东西有麻无辣？", o:["花椒","麻酱","麻油","麻糖"], a:0 },
+  { q:"什么东西有咸无淡？", o:["盐","咸菜","咸鱼","咸蛋"], a:0 },
+  { q:"什么东西有淡无咸？", o:["淡水","淡茶","淡酒","淡饭"], a:0 },
+  { q:"什么东西有软无硬？", o:["软糖","软泥","软木","软盘"], a:0 },
+  { q:"什么东西有硬无软？", o:["石头","铁","钢","钻石"], a:0 },
+  { q:"什么东西有轻无重？", o:["氢气","羽毛","棉花","空气"], a:0 },
+  { q:"什么东西有重无轻？", o:["铁","铅","金","银"], a:0 },
+  { q:"什么东西有冷无热？", o:["冰","雪","霜","雹"], a:0 },
+  { q:"什么东西有热无冷？", o:["火","太阳","岩浆","热水"], a:0 },
+  { q:"什么东西有干无湿？", o:["沙漠","干柴","干粮","干冰"], a:0 },
+  { q:"什么东西有湿无干？", o:["水","泥","汗","泪"], a:0 },
+  { q:"什么东西有新无旧？", o:["新闻","新年","新月","新生"], a:0 },
+  { q:"什么东西有旧无新？", o:["古董","旧物","旧址","旧事"], a:0 },
+  { q:"什么东西有生无死？", o:["生命","生活","生存","生长"], a:0 },
+  { q:"什么东西有死无生？", o:["死亡","死尸","死物","死角"], a:0 },
+  { q:"什么东西有来无回？", o:["单程","单程票","一去不复返","有去无回"], a:0 },
+  { q:"什么东西有回无来？", o:["回声","回响","回答","回复"], a:0 },
+  { q:"什么东西有去无来？", o:["去世","去路","去向","去处"], a:0 },
+  { q:"什么东西有来无去？", o:["来历","来源","来由","来意"], a:0 },
+  { q:"什么东西有上无下？", o:["上楼","上山","上天","上游"], a:0 },
+  { q:"什么东西有下无上？", o:["下楼","下山","下海","下游"], a:0 },
+  { q:"什么东西有左无右？", o:["左边","左侧","左派","左翼"], a:0 },
+  { q:"什么东西有右无左？", o:["右边","右侧","右派","右翼"], a:0 },
+  { q:"什么东西有前无后？", o:["前途","前景","前方","前线"], a:0 },
+  { q:"什么东西有后无前？", o:["后悔","后来","后面","后台"], a:0 },
+  { q:"什么东西有东无西？", o:["东方","东边","东风","东海"], a:0 },
+  { q:"什么东西有西无东？", o:["西方","西边","西风","西瓜"], a:0 },
+  { q:"什么东西有南无北？", o:["南方","南边","南风","南海"], a:0 },
+  { q:"什么东西有北无南？", o:["北方","北边","北风","北极"], a:0 },
+  { q:"什么东西有春无秋？", o:["春天","春季","春风","春雨"], a:0 },
+  { q:"什么东西有秋无春？", o:["秋天","秋季","秋风","秋雨"], a:0 },
+  { q:"什么东西有夏无冬？", o:["夏天","夏季","夏日","夏夜"], a:0 },
+  { q:"什么东西有冬无夏？", o:["冬天","冬季","冬日","冬夜"], a:0 },
+  { q:"什么东西有昼无夜？", o:["白昼","昼夜","昼间","昼伏夜出"], a:0 },
+  { q:"什么东西有夜无昼？", o:["夜晚","夜间","夜色","夜空"], a:0 },
+  { q:"什么东西有早无晚？", o:["早晨","早上","早安","早操"], a:0 },
+  { q:"什么东西有晚无早？", o:["晚上","夜晚","晚安","晚会"], a:0 },
+  { q:"什么东西有朝无暮？", o:["朝阳","朝霞","朝气","朝思暮想"], a:0 },
+  { q:"什么东西有暮无朝？", o:["暮色","暮年","暮春","暮气沉沉"], a:0 },
+  { q:"什么东西有始无终？", o:["开始","始终","有始无终","无始无终"], a:0 },
+  { q:"什么东西有终无始？", o:["终点","终结","终于","终止"], a:0 },
+  { q:"什么东西有头无尾？", o:["砖头","火柴","蜡烛","铅笔"], a:0 },
+  { q:"什么东西有尾无头？", o:["彗星","尾巴","尾声","尾数"], a:0 },
+  { q:"什么东西有始有终？", o:["故事","事情","工作","任务"], a:0 },
+  { q:"什么东西无始无终？", o:["时间","空间","宇宙","永恒"], a:0 },
+];
+
+const TOTAL = 20;
+const TOTAL_TIME = 30 * 60;
+const LETTERS = ['A','B','C','D'];
+
+let S = {};
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function fmtTime(s) {
+  const m = Math.floor(s / 60);
+  const ss = s % 60;
+  return String(m).padStart(2,'0') + ':' + String(ss).padStart(2,'0');
+}
+
+function toast(msg, dur=2000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.style.display = 'block'; el.style.opacity = '1';
+  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.style.display='none', 300); }, dur);
+}
+
+function pickQuestions() {
+  return shuffle(QUESTIONS).slice(0, TOTAL).map(q => {
+    const indices = q.o.map((_, i) => i);
+    const shuffledIdx = shuffle(indices);
+    return {
+      q: q.q,
+      o: shuffledIdx.map(i => q.o[i]),
+      a: shuffledIdx.indexOf(q.a)
+    };
+  });
+}
+
+function startQuiz() {
+  S = {
+    screen: 'quiz',
+    qs: pickQuestions(),
+    answers: new Array(TOTAL).fill(null).map(() => ({sel:null, ok:null})),
+    cur: 0,
+    start: Date.now(),
+    elapsed: 0,
+    tmr: null,
+  };
+  S.tmr = setInterval(() => {
+    S.elapsed = Math.floor((Date.now() - S.start) / 1000);
+    if (S.elapsed >= TOTAL_TIME) {
+      clearInterval(S.tmr);
+      showResult();
+    } else {
+      const el = document.getElementById('td');
+      if (el) {
+        const rem = TOTAL_TIME - S.elapsed;
+        el.textContent = fmtTime(rem);
+        const w = el.closest('.timer');
+        if (w) w.className = 'timer ' + (rem < 60 ? 'danger' : rem < 300 ? 'warning' : '');
+      }
+    }
+  }, 1000);
+  render();
+}
+
+function selectOpt(idx) {
+  if (S.answers[S.cur].sel !== null) return;
+  S.answers[S.cur] = {sel: idx, ok: idx === S.qs[S.cur].a};
+  render();
+}
+
+function goNext() {
+  if (S.cur < TOTAL - 1) { S.cur++; render(); }
+  else showResult();
+}
+
+function goPrev() {
+  if (S.cur > 0) { S.cur--; render(); }
+}
+
+function jumpTo(i) { S.cur = i; render(); }
+
+function submitQuiz() {
+  const unanswered = S.answers.filter(a => a.sel === null).length;
+  if (unanswered > 0) {
+    toast('还有 ' + unanswered + ' 题未答完，确认提交？', 3000);
+    return;
+  }
+  showResult();
+}
+
+function showResult() {
+  clearInterval(S.tmr);
+  S.screen = 'result';
+  render();
+}
+
+function restart() { startQuiz(); }
+
+function render() {
+  const app = document.getElementById('app');
+  app.innerHTML = S.screen === 'start' ? renderStart() : S.screen === 'quiz' ? renderQuiz() : renderResult();
+  bind();
+}
+
+function renderStart() {
+  return `<div class="fade-up">
+  <div class="header">
+    <div class="badge">🧠 思维挑战</div>
+    <h1>脑筋急转弯</h1>
+    <p>200道高难度题库 · 随机抽取20道 · 限时30分钟</p>
+  </div>
+  <div class="card">
+    <div class="start-icon">💡</div>
+    <div class="rules">
+      <div class="rule-item"><span class="rule-icon">📋</span><span>共200道高难度题库，每次随机抽取20道</span></div>
+      <div class="rule-item"><span class="rule-icon">⏱</span><span>限时30分钟，时间到自动交卷</span></div>
+      <div class="rule-item"><span class="rule-icon">↩</span><span>每题只能选一次，不可修改</span></div>
+      <div class="rule-item"><span class="rule-icon">📊</span><span>完成显示得分与完整答案回顾</span></div>
+    </div>
+    <button class="start-btn" id="btn-start">开始挑战</button>
+  </div>
+</div>`;
+}
+
+function renderQuiz() {
+  const q = S.qs[S.cur];
+  const ans = S.answers[S.cur];
+  const answered = S.answers.filter(a => a.sel !== null).length;
+  const pct = ((S.cur + 1) / TOTAL * 100).toFixed(0);
+  const rem = TOTAL_TIME - S.elapsed;
+  const tClass = rem < 60 ? 'danger' : rem < 300 ? 'warning' : '';
+
+  let optsHtml = q.o.map((opt, i) => {
+    let cls = 'option';
+    if (ans.sel !== null) {
+      if (i === q.a) cls += ' correct';
+      else if (i === ans.sel) cls += ' wrong';
+    }
+    return `<div class="${cls}" data-idx="${i}"><div class="opt-letter">${LETTERS[i]}</div><span>${opt}</span></div>`;
+  }).join('');
+
+  let navHtml = S.qs.map((_, i) => {
+    const a = S.answers[i];
+    let cls = 'nav-dot';
+    if (i === S.cur) cls += ' current';
+    else if (a.sel === null) cls += ' unanswered';
+    else if (a.ok) cls += ' done-correct';
+    else cls += ' done-wrong';
+    return `<div class="${cls}" data-j="${i}">${i+1}</div>`;
+  }).join('');
+
+  return `
+  <div class="header">
+    <div class="badge">🧠 脑筋急转弯</div>
+    <h1>第 ${S.cur+1} / ${TOTAL} 题</h1>
+    <div class="timer ${tClass}"><span>⏱</span><span id="td">${fmtTime(rem)}</span></div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-info"><span>已答 ${answered}/${TOTAL}</span><span>${pct}%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+  </div>
+  <div class="card">
+    <div class="q-num">第 ${S.cur+1} 题</div>
+    <div class="question">${q.q}</div>
+    <div class="options">${optsHtml}</div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" id="btn-prev" ${S.cur===0?'disabled style="opacity:0.3"':''}>← 上一题</button>
+    ${S.cur === TOTAL-1
+      ? `<button class="btn btn-primary" id="btn-submit">提交全部 →</button>`
+      : `<button class="btn btn-primary" id="btn-next">下一题 →</button>`}
+  </div>
+  <div class="nav-dots">${navHtml}</div>`;
+}
+
+function renderResult() {
+  const correct = S.answers.filter(a => a.ok).length;
+  const wrong = TOTAL - correct;
+  const pct = Math.round(correct / TOTAL * 100);
+  const circ = 2 * Math.PI * 52;
+  const offset = circ * (1 - pct / 100);
+
+  let title, desc;
+  if (pct === 100) { title = '👑 世界第一'; desc = '无敌！你是脑筋急转弯的神！'; }
+  else if (pct >= 90) { title = '🚀 牛逼克拉斯'; desc = '太强了，这脑子转得飞快！'; }
+  else if (pct >= 80) { title = '🔥 牛逼'; desc = '厉害啊，思维相当敏捷！'; }
+  else if (pct >= 70) { title = '💪 牛人'; desc = '不错不错，脑子很灵光！'; }
+  else if (pct >= 60) { title = '😐 一般'; desc = '还行吧，中规中矩。'; }
+  else if (pct >= 50) { title = '🗑️ 比较垃圾'; desc = '脑子转得有点慢，多练练吧！'; }
+  else if (pct >= 40) { title = '♿ 垃圾'; desc = '这成绩...建议多玩几次练练脑子。'; }
+  else if (pct >= 30) { title = '🧠 废物'; desc = '兄弟，你还好吗？需要帮你叫救护车吗？'; }
+  else { title = '💩 废物中的废物'; desc = '建议回炉重造。'; }
+
+  const reviewHtml = S.qs.map((q, i) => {
+    const a = S.answers[i];
+    const isCorrect = a.ok;
+    const userOpt = a.sel !== null ? q.o[a.sel] : '未作答';
+    return `<div class="review-item">
+      <div class="review-q"><span class="review-q-num">Q${i+1}</span><span>${q.q}</span></div>
+      <div class="review-answer">正确答案：<strong>${q.o[q.a]}</strong></div>
+      <div class="review-user ${isCorrect?'correct':'wrong'}">你的答案：<strong>${userOpt}</strong> ${isCorrect?'✓':'✗'}</div>
+    </div>`;
+  }).join('');
+
+  return `<div class="fade-up">
+  <div class="header">
+    <div class="badge">🎉 挑战完成</div>
+    <h1>答题结果</h1>
+  </div>
+  <div class="card result-card">
+    <div class="score-ring">
+      <svg width="130" height="130" viewBox="0 0 130 130">
+        <circle class="score-bg" cx="65" cy="65" r="52"/>
+        <circle class="score-fill" cx="65" cy="65" r="52" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
+      </svg>
+      <div class="score-text"><div class="score-num">${pct}</div><div class="score-label">正确率</div></div>
+    </div>
+    <div class="result-title">${title}</div>
+    <div class="result-desc">${desc}</div>
+    <div class="stat-row">
+      <div class="stat-box"><div class="stat-num g">${correct}</div><div class="stat-label">答对</div></div>
+      <div class="stat-box"><div class="stat-num r">${wrong}</div><div class="stat-label">答错</div></div>
+      <div class="stat-box"><div class="stat-num">${TOTAL}</div><div class="stat-label">总题数</div></div>
+    </div>
+    <button class="restart-btn" id="btn-restart">🔄 再来一次</button>
+  </div>
+  <div class="review-title">答案回顾</div>
+  ${reviewHtml}
+</div>`;
+}
+
+function bind() {
+  document.getElementById('btn-start')?.addEventListener('click', startQuiz);
+  document.getElementById('btn-next')?.addEventListener('click', goNext);
+  document.getElementById('btn-prev')?.addEventListener('click', goPrev);
+  document.getElementById('btn-submit')?.addEventListener('click', submitQuiz);
+  document.getElementById('btn-restart')?.addEventListener('click', restart);
+  document.querySelectorAll('.option').forEach(el => {
+    el.addEventListener('click', () => selectOpt(parseInt(el.dataset.idx)));
+  });
+  document.querySelectorAll('.nav-dot[data-j]').forEach(el => {
+    el.addEventListener('click', () => jumpTo(parseInt(el.dataset.j)));
+  });
+}
+
+S = { screen: 'start' };
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>脑筋急转弯测试</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #f59e0b;
+            --primary-dark: #d97706;
+            --secondary: #10b981;
+            --accent: #ec4899;
+            --bg-dark: #0f0f1a;
+            --bg-card: #1a1a2e;
+            --bg-light: #16213e;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .bg-animation {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(245, 158, 11, 0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(16, 185, 129, 0.08) 0%, transparent 60%);
+        }
+        
+        .container { max-width: 640px; margin: 0 auto; padding: 20px; }
+        
+        /* 头部 */
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+        .header p {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        /* 开始页 */
+        .start-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .start-screen .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        .start-screen .subtitle {
+            color: var(--primary);
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 30px;
+        }
+        .start-screen .tips {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        .start-screen .tips h3 {
+            color: var(--primary);
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        .start-screen .tips li {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        .start-screen .tips li::before {
+            content: '💡';
+            position: absolute;
+            left: 0;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #000;
+            border: none;
+            padding: 16px 48px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3); }
+        .btn:active { transform: translateY(0); }
+        
+        /* 进度条 */
+        .progress-bar {
+            background: var(--bg-card);
+            border-radius: 8px;
+            height: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-bar .fill {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            height: 100%;
+            border-radius: 8px;
+            transition: width 0.3s;
+        }
+        
+        /* 问题卡片 */
+        .question-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 28px 24px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(245, 158, 11, 0.1);
+        }
+        .question-number {
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .question-text {
+            font-size: 17px;
+            font-weight: 500;
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+        
+        /* 选项 */
+        .options { display: flex; flex-direction: column; gap: 10px; }
+        .option {
+            background: var(--bg-light);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            font-family: inherit;
+            color: var(--text);
+        }
+        .option:hover { border-color: var(--primary); }
+        .option.selected {
+            border-color: var(--primary);
+            background: rgba(245, 158, 11, 0.15);
+        }
+        .option.correct { border-color: var(--secondary); background: rgba(16, 185, 129, 0.15); }
+        .option.wrong { border-color: var(--accent); background: rgba(236, 72, 153, 0.15); }
+        
+        /* 底部按钮 */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .nav-buttons .btn-nav {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .btn-prev {
+            background: var(--bg-card);
+            color: var(--text-muted);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        .btn-prev:hover { border-color: var(--primary); color: var(--text); }
+        .btn-next {
+            background: var(--primary);
+            color: #000;
+            border: none;
+        }
+        .btn-next:hover { background: var(--primary-dark); }
+        .btn-next:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        /* 结果页 */
+        .result-screen { text-align: center; padding: 40px 20px; }
+        .score-circle {
+            width: 160px; height: 160px;
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            box-shadow: 0 10px 40px rgba(245, 158, 11, 0.25);
+        }
+        .score-circle .score { font-size: 48px; font-weight: 900; color: #000; }
+        .score-circle .total { font-size: 18px; color: rgba(0,0,0,0.6); }
+        
+        .result-title {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .result-desc {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 30px;
+        }
+        
+        .result-analysis {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+        .result-analysis h3 {
+            color: var(--primary);
+            font-size: 15px;
+            margin-bottom: 16px;
+        }
+        .result-analysis .item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            font-size: 14px;
+        }
+        .result-analysis .item:last-child { border-bottom: none; }
+        .result-analysis .label { color: var(--text-muted); }
+        .result-analysis .value { color: var(--primary); font-weight: 600; }
+        
+        .btn-retry {
+            background: var(--bg-card);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 14px 40px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .btn-retry:hover { background: var(--primary); color: #000; }
+        
+        /* 隐藏 */
+        .hidden { display: none !important; }
+        
+        /* 动画 */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.3s ease; }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    
+    <div id="app" class="container">
+        <!-- 开始页 -->
+        <div id="startScreen" class="start-screen">
+            <div class="icon">🧠</div>
+            <h1>脑筋急转弯测试</h1>
+            <p class="subtitle">考验你的思维敏捷度和创意思维</p>
+            <div class="tips">
+                <h3>📋 测试说明</h3>
+                <li>共 <strong>20</strong> 道趣味脑筋急转弯</li>
+                <li>不限制时间，尽情发挥你的创意</li>
+                <li>答对越多，说明你的思维越灵活</li>
+                <li>答案往往出人意料，突破常规思考</li>
+            </div>
+            <button class="btn" onclick="startTest()">开始挑战 →</button>
+        </div>
+        
+        <!-- 答题页 -->
+        <div id="quizScreen" class="hidden">
+            <div class="progress-bar">
+                <div class="fill" id="progressFill"></div>
+            </div>
+            <div id="questionCard" class="question-card fade-in"></div>
+            <div class="nav-buttons">
+                <button class="btn-nav btn-prev" id="prevBtn" onclick="prevQuestion()">← 上一题</button>
+                <button class="btn-nav btn-next" id="nextBtn" onclick="nextQuestion()">下一题 →</button>
+            </div>
+        </div>
+        
+        <!-- 结果页 -->
+        <div id="resultScreen" class="result-screen hidden">
+            <div class="score-circle">
+                <div class="score" id="finalScore">0</div>
+                <div class="total">/ 20</div>
+            </div>
+            <div class="result-title" id="resultTitle"></div>
+            <p class="result-desc" id="resultDesc"></p>
+            <div class="result-analysis">
+                <h3>📊 答题分析</h3>
+                <div class="item"><span class="label">答对题数</span><span class="value" id="correctCount">0</span></div>
+                <div class="item"><span class="label">正确率</span><span class="value" id="accuracy">0%</span></div>
+                <div class="item"><span class="label">反应速度</span><span class="value" id="reactionSpeed">—</span></div>
+            </div>
+            <button class="btn-retry" onclick="restartTest()">🔄 再试一次</button>
+        </div>
+    </div>
+    
+    <script>
+        const questions = [
+            {
+                q: "什么字，一眼看到就认为是人，但又不是"人"？",
+                options: ["大", "个", "夫", "从"],
+                answer: 2
+            },
+            {
+                q: "一个警察有个弟弟，但弟弟说没有哥哥，这是怎么回事？",
+                options: ["警察是女的", "弟弟是收养的", "警察是姐姐", "弟弟在说谎"],
+                answer: 0
+            },
+            {
+                q: "什么车既不走路也不坐人？",
+                options: ["火车", "汽车", "风车", "自行车"],
+                answer: 2
+            },
+            {
+                q: "什么球不能踢？",
+                options: ["地球", "排球", "篮球", "气球"],
+                answer: 0
+            },
+            {
+                q: "谁每天都戴着手套，却从不觉得热？",
+                options: ["手套店老板", "机器人", "雪人", "医生"],
+                answer: 2
+            },
+            {
+                q: "什么河永远不会干涸？",
+                options: ["长江", "黄河", "银河", "护城河"],
+                answer: 2
+            },
+            {
+                q: "小明考试从未作弊，但这次考了满分，为什么？",
+                options: ["题目太简单", "换了监考老师", "这是口试", "他就是小明本明"],
+                answer: 3
+            },
+            {
+                q: "什么书在书店买不到？",
+                options: ["禁书", "天书", "电子书", "旧书"],
+                answer: 1
+            },
+            {
+                q: "一个盒子有几个面？",
+                options: ["4个", "5个", "6个", "7个"],
+                answer: 2
+            },
+            {
+                q: "什么字，二十去掉上面变成女字？",
+                options: ["花", "娘", "要", "每"],
+                answer: 3
+            },
+            {
+                q: "什么动物最怕考试？",
+                options: ["熊猫", "考拉", "马", "狗"],
+                answer: 2
+            },
+            {
+                q: "什么东西越洗越脏？",
+                options: ["衣服", "脸", "水", "手"],
+                answer: 2
+            },
+            {
+                q: "小明有5个苹果，分给小红、小丽、小华各1个，小明还剩几个？",
+                options: ["2个", "1个", "3个", "0个"],
+                answer: 0
+            },
+            {
+                q: "什么字加一笔变成另一个字？",
+                options: ["日→目", "大→太", "木→术", "以上都是"],
+                answer: 3
+            },
+            {
+                q: "谁说真话但没人相信？",
+                options: ["老师", "医生", "天气预报员", "骗子"],
+                answer: 3
+            },
+            {
+                q: "什么倒立之后会增加一半？",
+                options: ["6", "8", "9", "0"],
+                answer: 2
+            },
+            {
+                q: "什么东西你能接住却不能扔？",
+                options: ["球", "水", "吻", "石头"],
+                answer: 2
+            },
+            {
+                q: "什么动物没有方向感？",
+                options: ["蝙蝠", "麋鹿", "企鹅", "没有方向感的动物"],
+                answer: 1
+            },
+            {
+                q: "什么时候1+1=1？",
+                options: ["算错时", "一群羊加一群羊", "一个男人加一个女人", "以上都对"],
+                answer: 3
+            },
+            {
+                q: "什么路最不能走？",
+                options: ["冤枉路", "电路", "套路", "思路"],
+                answer: 2
+            }
+        ];
+        
+        let currentQuestion = 0;
+        let answers = new Array(questions.length).fill(null);
+        let startTime = null;
+        let endTime = null;
+        
+        function startTest() {
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+            startTime = Date.now();
+            showQuestion();
+        }
+        
+        function showQuestion() {
+            const q = questions[currentQuestion];
+            const card = document.getElementById('questionCard');
+            
+            // 更新进度
+            document.getElementById('progressFill').style.width = ((currentQuestion + 1) / questions.length * 100) + '%';
+            
+            // 渲染题目
+            let html = `<div class="question-number">第 ${currentQuestion + 1} / ${questions.length} 题</div>`;
+            html += `<div class="question-text">${q.q}</div>`;
+            html += `<div class="options">`;
+            
+            q.options.forEach((opt, i) => {
+                const selected = answers[currentQuestion] === i ? 'selected' : '';
+                html += `<button class="option ${selected}" onclick="selectOption(${i})">${opt}</button>`;
+            });
+            
+            html += `</div>`;
+            card.innerHTML = html;
+            card.classList.remove('fade-in');
+            void card.offsetWidth;
+            card.classList.add('fade-in');
+            
+            // 更新按钮
+            document.getElementById('prevBtn').disabled = currentQuestion === 0;
+            document.getElementById('nextBtn').textContent = currentQuestion === questions.length - 1 ? '查看结果 →' : '下一题 →';
+        }
+        
+        function selectOption(index) {
+            answers[currentQuestion] = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.remove('selected');
+                if (i === index) opt.classList.add('selected');
+            });
+        }
+        
+        function nextQuestion() {
+            if (answers[currentQuestion] === null) {
+                return;
+            }
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+        
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+            }
+        }
+        
+        function showResult() {
+            endTime = Date.now();
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+            
+            let correct = 0;
+            questions.forEach((q, i) => {
+                if (answers[i] === q.answer) correct++;
+            });
+            
+            const accuracy = Math.round(correct / questions.length * 100);
+            const timeSpent = Math.round((endTime - startTime) / 1000 / 60);
+            
+            document.getElementById('finalScore').textContent = correct;
+            document.getElementById('correctCount').textContent = correct + ' 题';
+            document.getElementById('accuracy').textContent = accuracy + '%';
+            document.getElementById('reactionSpeed').textContent = timeSpent < 5 ? '极快 ⚡' : timeSpent < 10 ? '正常 👍' : '稳重 💪';
+            
+            let title, desc;
+            if (correct >= 18) {
+                title = "🧠 天才级别！";
+                desc = "你的思维极其灵活，脑筋急转弯对你来说简直是送分题！";
+            } else if (correct >= 15) {
+                title = "🚀 聪明过人";
+                desc = "反应很快，创意十足，很多问题都难不倒你！";
+            } else if (correct >= 12) {
+                title = "💡 思维敏捷";
+                desc = "不错不错，有一定的脑筋急转弯天赋，继续加油！";
+            } else if (correct >= 8) {
+                title = "🎯 潜力股";
+                desc = "别灰心，多练练脑筋急转弯，你会发现世界很有趣！";
+            } else {
+                title = "😄 享受过程";
+                desc = "重在参与！脑筋急转弯就是要突破常规思维，再试一次吧！";
+            }
+            
+            document.getElementById('resultTitle').textContent = title;
+            document.getElementById('resultDesc').textContent = desc;
+        }
+        
+        function restartTest() {
+            currentQuestion = 0;
+            answers = new Array(questions.length).fill(null);
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
